@@ -26,14 +26,14 @@ class SQL
 	var $pass;
 	var $db;
 	var $last_query;
-	
+
 	function SQL( $host, $user, $pass, $db )
 	{
 		$this->host = $host;
 		$this->user = $user;
 		$this->pass = $pass;
 		$this->db   = $db;
-		
+
 		$this->last_query = "";
 	}
 	function get_error()
@@ -49,7 +49,7 @@ class SQL
 		$err = $this->get_error();
 		if(!$err)
 			return;
-		
+
 		$error = '
 		<b style="color:red">
 		Fehler: '.$err.'
@@ -60,7 +60,7 @@ class SQL
 		'.htmlentities($this->last_query).'
 		</pre>
 		';
-		
+
 		if($critical == 1)
 			die($error);
 		else
@@ -74,23 +74,23 @@ class SQL
 	{
 		return 0;
 	}
-	function query_array()
+	function query_array($query)
 	{
 		return 0;
 	}
-	function query_count()
+	function query_count($query)
 	{
 		return 0;
 	}
-	function query_multiple()
+	function query_multiple($query)
 	{
 		return 0;
 	}
-	function query_one()
+	function query_one($query)
 	{
 		return 0;
 	}
-	function query_exec()
+	function query_exec($query)
 	{
 		return 0;
 	}

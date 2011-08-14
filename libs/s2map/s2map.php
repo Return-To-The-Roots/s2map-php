@@ -19,6 +19,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Return To The Roots. If not, see <http://www.gnu.org/licenses/>.
 
+error_reporting(error_reporting()&~E_NOTICE);
+
 require_once(s2map::_dir("file_helpers.php"));
 require_once(s2map::_dir("s2pal.php"));
 require_once(s2map::_dir("s2gou.php"));
@@ -199,10 +201,10 @@ class s2map
 		$text .= "(".$this->header['width']."x".$this->header['height'].", ".$this->header['players']." players)";
 
 		$size = 12;
-		$box = imagettfbbox($size, 0, "s2map.ttf", $text);
+		$box = imagettfbbox($size, 0, __DIR__."/s2map.ttf", $text);
 
 		imagefilledrectangle($img, 2, 2, 6 + $box[2], 8 + $size*1.45 *2, imagecolorallocate($img, 0xFF, 0xFF, 0xFF));
-		imagettftext($img, $size, 0, 4, 18, imagecolorallocate($img, 0x00, 0x00, 0x00), "s2map.ttf", $text);
+		imagettftext($img, $size, 0, 4, 18, imagecolorallocate($img, 0x00, 0x00, 0x00), __DIR__."/s2map.ttf", $text);
 
 
 		$temp_file = tempnam(sys_get_temp_dir(), 's2map');

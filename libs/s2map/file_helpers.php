@@ -104,7 +104,6 @@ class file_helpers
 	static function freadid($file)
 	{
 		$id = fread($file, 10);
-		echo "xxx$id xxx";
 		return ($id == "WORLD_V1.0");
 	}
 
