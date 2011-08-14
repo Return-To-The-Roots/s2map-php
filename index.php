@@ -21,10 +21,25 @@
 
 $files = scandir("maps/");
 foreach($files as $f)
+$base = "maps/";
+
+function scan($dir = "")
 {
-	$ff = pathinfo($f);
-	if(strtolower($ff['extension']) == "swd" || strtolower($ff['extension']) == "wld")
+	global $base;
+
+	$files = scandir($dir);
+	foreach($files as $f)
 	{
-		echo '<p><img src="map.php?map='.$f.'"></p>';
+		$ff = pathinfo($dir.$f);
+		if(strtolower($ff['extension']) == "swd" || strtolower($ff['extension']) == "wld")
+		{
+			$link = 'map.php?map='.substr($dir, strlen($base)).$f;
+			echo '<p><a href="'.$link.'" onmouseover="javascript:document.getElementById(\''.$f.'\').style.height=null" onmouseout="javascript:document.getElementById(\''.$f.'\').style.height=\'200px\'"><img id="'.$f.'" style="border:0px; height: 200px" src="'.$link.'"></a></p>';
+		}
+		#echo $f."<br>\n";
+		if(is_dir($dir.$f) && $f != ".svn" && $f != "." && $f != "..")
+			scan($dir.$f."/");
 	}
 }
+
+scan($base);

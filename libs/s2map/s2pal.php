@@ -37,7 +37,7 @@ class s2pal
 		case 'aco':	$this->_loadACT($file); break;
 		}
 	}
-	
+
 	private function _loadBBM($file)
 	{
 		$bbm =  fopen($file, "rb");
@@ -47,7 +47,7 @@ class s2pal
 		fseek($bbm, 48, SEEK_SET);
 		$this->_load($bbm);
 		fclose($bbm);
-		
+
 		return true;
 	}
 
@@ -59,10 +59,10 @@ class s2pal
 
 		$this->_load($act);
 		fclose($act);
-		
+
 		return true;
 	}
-		
+
 	private function _load($f)
 	{
 		for($i = 0; $i < 256; $i++)
@@ -73,17 +73,17 @@ class s2pal
 			$this->colors[$i] = array("r" => $r, "g" => $g, "b" => $b);
 		}
 	}
-	
+
 	function rgb($color)
 	{
 		return $this->colors[$color];
 	}
-	
+
 	function transparent()
 	{
 		return $this->rgb($this->transparent);
 	}
-	
+
 	function apply($img, $color)
 	{
 		$c = $color;

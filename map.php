@@ -25,17 +25,16 @@ if(isset($_GET['map']))
 {
 	$map = $_GET['map'];
 	$mapmap = pathinfo($map);
-	if(strtolower($ff['extension']) == "swd" || strtolower($ff['extension']) == "wld")
+	if(!strtolower($mapmap['extension']) == "swd" && !strtolower($mapmap['extension']) == "wld")
 		die("no S2-Map");
-	$map = $mapmap['basename'];
+	//$map = $mapmap['basename'];
 }
-
 
 $map = new s2map("maps/".$map);
 
-header("Expires: Mon, 01 Jul 1990 00:00:00 GMT"); 
-header("Last-Modified: " . gmdate("D, d M Y H:i:s") ." GMT"); 
-header("Pragma: no-cache"); 
+header("Expires: Mon, 01 Jul 1990 00:00:00 GMT");
+header("Last-Modified: " . gmdate("D, d M Y H:i:s") ." GMT");
+header("Pragma: no-cache");
 header("Cache-Control: no-store, no-cache, max-age=0, must-revalidate");
 header("Content-Type: image/png", true);
 
