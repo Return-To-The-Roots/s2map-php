@@ -19,7 +19,16 @@
 // You should have received a copy of the GNU General Public License
 // along with Return To The Roots. If not, see <http://www.gnu.org/licenses/>.
 
-error_reporting(error_reporting()&~E_NOTICE);
+#error_reporting(error_reporting()&~E_NOTICE);
+ini_set("log_errors", "s2map.log");
+
+error_log("\n\n", 3, __DIR__."/s2map.log");
+
+function handler($errno, $errstr, $errfile, $errline)
+{
+	error_log("$errfile:$errline - $errstr\n", 3, __DIR__."/s2map.log");
+}
+set_error_handler("handler", E_NOTICE);
 
 require_once(s2map::_dir("file_helpers.php"));
 require_once(s2map::_dir("s2pal.php"));
@@ -126,43 +135,82 @@ class s2map
 
 		imagecolortransparent($img, $s2pal->apply($img, $s2pal->transparent()));
 
-		// TODO: VERY VERY BIG TODO ...
-		$terrain_colors = array(
-			0x00 => 0xE7,  // steppe meadow
-			0x40 => 0,     //
-			0x01 => 0xC3,  // mining 1
-			0x02 => 0x9D,  // snow
-			0x03 => 0xE8,  // swamp
-			0x04 => 0xC4,  // steppe
-			0x05 => 0x3D,  // water
-			0x06 => 0x9D,  //
-			0x07 => 0xC6,  //
-			0x08 => 0xE4,  // meadow1
-			0x48 => 0,     //
-			0x09 => 0xE6,  // meadow2
-			0x49 => 0,     //
-			0x0A => 0xE4,  // meadow3
-			0x4A => 0,     //
-			0x0B => 0xC4,  // mining 2
-			0x0C => 0xC6,  // mining 3
-			0x0D => 0xC0,  // mining 4
-			0x0E => 0xE9,  //
-			0x4E => 0,     //
-			0x0F => 0xE7,  // flower
-			0x4F => 0,     //
-			0x10 => 0x39,  // lava
-			0x12 => 0xC2,  // mining meadow
-			0x52 => 0,     //
-		);
-
 		switch($this->header['type'])
 		{
+		case 0: // greenland
+			{
+				$terrain_colors = array(
+					 0 => 233,  // Savannah
+					 1 => 216,  // Mountain #1
+					 2 => 123,  // Snow
+					 3 => 233,  // Swamp
+					 4 => 199,  // Desert #1
+					 5 =>  61,  // Water
+					 6 =>  61,  // Buildable Water
+					 7 => 199,  // Desert #2
+					 8 => 231,  // Meadow #1
+					 9 => 233,  // Meadow #2
+					10 => 230,  // Meadow #3
+					11 => 216,  // Mountain #2
+					12 => 216,  // Mountain #3
+					13 => 215,  // Mountain #4
+					14 => 236,  // Steppe
+					15 => 231,  // Flower Meadow
+					16 =>  57,  // Lava
+					17 => 254,  // Magenta (Sharp edge!)
+					18 => 216,  // Mountain Meadow
+					19 =>  61,  // Water (Ships don't use this)
+				);
+			} break;
 		case 1: // waste
 			{
-				$terrain_colors[0x05] = 0x39;
+				$terrain_colors = array(
+					 0 => 114,  // Savannah
+					 1 => 167,  // Mountain #1
+					 2 => 139,  // Snow
+					 3 => 160,  // Swamp
+					 4 =>  85,  // Desert #1
+					 5 =>  42,  // Water
+					 6 =>  42,  // Buildable Water
+					 7 =>  85,  // Desert #2
+					 8 => 165,  // Meadow #1
+					 9 => 166,  // Meadow #2
+					10 => 166,  // Meadow #3
+					11 =>  33,  // Mountain #2
+					12 => 212,  // Mountain #3
+					13 => 212,  // Mountain #4
+					14 => 167,  // Steppe
+					15 => 114,  // Flower Meadow
+					16 => 248,  // Lava
+					17 => 254,  // Magenta (Sharp edge!)
+					18 => 160,  // Mountain Meadow
+					19 =>  42,  // Water (Ships don't use this)
+				);
 			} break;
 		case 2: // winter
 			{
+				$terrain_colors = array(
+					 0 => 123,  // Savannah
+					 1 => 116,  // Mountain #1
+					 2 => 244,  // Snow
+					 3 => 244,  // Swamp
+					 4 => 183,  // Desert #1
+					 5 => 240,  // Water
+					 6 => 240,  // Buildable Water
+					 7 => 183,  // Desert #2
+					 8 =>  36,  // Meadow #1
+					 9 => 102,  // Meadow #2
+					10 => 123,  // Meadow #3
+					11 => 117,  // Mountain #2
+					12 => 118,  // Mountain #3
+					13 => 118,  // Mountain #4
+					14 => 233,  // Steppe
+					15 => 120,  // Flower Meadow
+					16 => 248,  // Lava
+					17 => 254,  // Magenta (Sharp edge!)
+					18 => 122,  // Mountain Meadow
+					19 => 240,  // Water (Ships don't use this)
+				);
 			} break;
 		}
 
