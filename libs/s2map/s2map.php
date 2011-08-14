@@ -126,6 +126,7 @@ class s2map
 
 		imagecolortransparent($img, $s2pal->apply($img, $s2pal->transparent()));
 
+		// TODO: VERY VERY BIG TODO ...
 		$terrain_colors = array(
 			0x00 => 0xE7,  // steppe meadow
 			0x40 => 0,     //
