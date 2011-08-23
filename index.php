@@ -68,8 +68,7 @@ function scan($dir = "")
 		if(is_dir($dir.$f) && $f != ".svn" && $f != "." && $f != "..")
 		{
 			echo '<div style="clear:both"></div>';
-			echo '<div style="float:left"><p><hr></p><p>'.$dir.$f.'</p></div>';
-			echo '<div style="clear:both"></div>';
+			echo '<div style="width: 100%"><p><hr></p></div><div><p>'.$dir.$f.'</p></div>';
 			scan($dir.$f."/");
 		}
 		else
