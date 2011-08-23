@@ -19,39 +19,28 @@
 // You should have received a copy of the GNU General Public License
 // along with Return To The Roots. If not, see <http://www.gnu.org/licenses/>.
 
-require_once(__DIR__."/error.php");
-require_once(__DIR__."/file_helpers.php");
+#error_reporting(error_reporting()&~E_NOTICE);
 
-class s2gou
+if(!function_exists("error_handler"))
 {
-	var $gouraud = array();
-
-	function s2gou($file)
+	$error_id = uniqid();
+	error_log("$error_id | ---- ".implode(', ', $_GET)."\n\n", 3, __DIR__."/error.log");
+	
+	function error_handler($errno, $errstr, $errfile, $errline)
 	{
-		$this->load($file);
-	}
-
-	function load($file)
-	{
-		$gou = fopen($file, "rb");
-		if(!$gou)
-			return false;
-
-		for($i = 0; $i < 256; $i++)
+		global $error_id;
+		
+		error_log("$error_id | $errfile:$errline - $errstr\n", 3, __DIR__."/error.log");
+		
+		/*$trace = debug_backtrace();
+		
+		foreach($trace as $t)
 		{
-			$this->gouraud[$i] = array();
-			for($j = 0; $j < 256; $j++)
-			{
-				$this->gouraud[$i][$j] = file_helpers::freadchar($gou);
-			}
-		}
-		fclose($gou);
-
-		return true;
+			$errfile = $t['file'];
+			$errline = $t['errline'];
+			$errstr = $t['function']."(".join(', '.$t['args']).")";
+			error_log("$error_id | => $errfile:$errline - $errstr\n", 3, __DIR__."/error.log");
+		}*/
 	}
-
-	function apply($s2pal, $color, $shadow)
-	{
-		return $s2pal->rgb($this->gouraud[$shadow][$color]);
-	}
+	set_error_handler("error_handler", E_ALL|E_NOTICE|E_USER_NOTICE);
 }

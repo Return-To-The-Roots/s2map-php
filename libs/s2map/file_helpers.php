@@ -19,6 +19,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Return To The Roots. If not, see <http://www.gnu.org/licenses/>.
 
+require_once(__DIR__."/error.php");
+
 class file_helpers
 {
 	static private function _oem2ansi($string)
@@ -73,7 +75,7 @@ class file_helpers
 		return $chars;
 	}
 
-	static function freadstring($file, $max)
+	static function freadstring($file, $max, $trim = true)
 	{
 		$chars = file_helpers::freadchars($file, $max);
 		$string = "";
@@ -84,7 +86,7 @@ class file_helpers
 			$string .= chr($c);
 		}
 
-		return file_helpers::_oem2ansi(trim($string));
+		return ($trim ? file_helpers::_oem2ansi(trim($string)) : $string);
 	}
 
 	static function freadshort($file)
@@ -94,6 +96,13 @@ class file_helpers
 		return $b * 256 + $a;
 	}
 
+	static function freadbshort($file)
+	{
+		$a = file_helpers::freadchar($file);
+		$b = file_helpers::freadchar($file);
+		return $b + $a * 256;
+	}
+
 	static function freadint($file)
 	{
 		$a = file_helpers::freadshort($file);
@@ -101,6 +110,13 @@ class file_helpers
 		return $b * 256*256 + $a;
 	}
 
+	static function freadbint($file)
+	{
+		$a = file_helpers::freadbshort($file);
+		$b = file_helpers::freadbshort($file);
+		return $b + $a * 256*256;
+	}
+	
 	static function freadid($file)
 	{
 		$id = fread($file, 10);

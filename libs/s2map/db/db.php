@@ -22,29 +22,32 @@
 // Initialization
 function db_init($config)
 {
-	$sql = NULL;
-
-	switch($config['backend'])
+	global $sql;
+	
+	if(!is_object($sql))
 	{
-	default:
+		switch($config['backend'])
 		{
-			die("Databasebackend \"".$config['backend']."\" unsupported!");
-		} break;
-	case "mysql":
-		{
-			require_once("mysql.php");
+		default:
+			{
+				die("Databasebackend \"".$config['backend']."\" unsupported!");
+			} break;
+		case "mysql":
+			{
+				require_once("mysql.php");
+	
+				$sql = new SQL_mysql($config['host'],$config['user'],$config['pass'],$config['db']);
+			} break;
+		case "pgsql":
+			{
+				require_once("pgsql.php");
+	
+				$sql = new SQL_pgsql($config['host'],$config['user'],$config['pass'],$config['db']);
+			} break;
+		}
 
-			$sql = new SQL_mysql($config['host'],$config['user'],$config['pass'],$config['db']);
-		} break;
-	case "pgsql":
-		{
-			require_once("pgsql.php");
-
-			$sql = new SQL_pgsql($config['host'],$config['user'],$config['pass'],$config['db']);
-		} break;
+		register_shutdown_function(array($sql, "disconnect"));
 	}
-
-	register_shutdown_function(array($sql, "disconnect"));
 
 	if(!$sql->connect())
 		die("Database Error: Connect failed");

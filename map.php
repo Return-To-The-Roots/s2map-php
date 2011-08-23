@@ -27,8 +27,9 @@ if(isset($_GET['map']))
 	$mapmap = pathinfo($map);
 	if(!strtolower($mapmap['extension']) == "swd" && !strtolower($mapmap['extension']) == "wld")
 		die("no S2-Map");
-	//$map = $mapmap['basename'];
 }
+else
+	die("");
 
 $map = new s2map("maps/".$map);
 

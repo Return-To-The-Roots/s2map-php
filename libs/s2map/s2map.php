@@ -19,20 +19,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Return To The Roots. If not, see <http://www.gnu.org/licenses/>.
 
-#error_reporting(error_reporting()&~E_NOTICE);
-ini_set("log_errors", "s2map.log");
+require_once(__DIR__."/error.php");
+require_once(__DIR__."/file_helpers.php");
 
-error_log("\n\n", 3, __DIR__."/s2map.log");
+require_once(__DIR__."/s2pal.php");
+require_once(__DIR__."/s2gou.php");
+require_once(__DIR__."/s2lbm.php");
 
-function handler($errno, $errstr, $errfile, $errline)
-{
-	error_log("$errfile:$errline - $errstr\n", 3, __DIR__."/s2map.log");
-}
-set_error_handler("handler", E_NOTICE);
-
-require_once(s2map::_dir("file_helpers.php"));
-require_once(s2map::_dir("s2pal.php"));
-require_once(s2map::_dir("s2gou.php"));
+require_once(__DIR__."/config/config.php");
+require_once(__DIR__."/db/db.php");
 
 class s2map
 {
@@ -45,25 +40,17 @@ class s2map
 
 	function s2map($file)
 	{
-		require_once(s2map::_dir("config/config.php"));
-		require_once(s2map::_dir("db/db.php"));
-
+		global $config;
 		$this->sql = db_init($config['sql']);
 
 		$this->hash = md5_file($file);
 		$this->file = $file;
 	}
 
-	static function _dir($file)
-	{
-		$path = explode('/', __FILE__);
-		unset($path[count($path)-1]);
-		return implode('/', $path). "/" . $file;
-	}
-
 	private function _error($error)
 	{
 		$this->error[] = $error;
+		trigger_error($error, E_USER_WARNING);
 		return $error;
 	}
 
@@ -119,101 +106,23 @@ class s2map
 	private function _generate()
 	{
 		$files = array(
-			0 => array("PAL5.BBM", "GOU5.DAT"),
-			1 => array("PAL6.BBM", "GOU6.DAT"),
-			2 => array("PAL7.BBM", "GOU7.DAT")
+			0 => array("PAL5.BBM", "GOU5.DAT", "TEX5.LBM"),
+			1 => array("PAL6.BBM", "GOU6.DAT", "TEX6.LBM"),
+			2 => array("PAL7.BBM", "GOU7.DAT", "TEX7.LBM")
 		);
 
 		if(!$this->_load())
 			return $this->error("failed to load map");
 
-		$s2pal = new s2pal(s2map::_dir("S2/GFX/PALETTE/".$files[$this->header['type']][0]));
-		$s2gou = new s2gou(s2map::_dir("S2/DATA/TEXTURES/".$files[$this->header['type']][1]));
+		$s2pal = new s2pal(__DIR__."/S2/GFX/PALETTE/".$files[$this->header['type']][0]);
+		$s2gou = new s2gou(__DIR__."/S2/DATA/TEXTURES/".$files[$this->header['type']][1]);
+		$s2lbm = new s2lbm(__DIR__."/S2/GFX/TEXTURES/".$files[$this->header['type']][2]);
 
 		$size = 12; //6;
 		$img = imagecreatetruecolor( $this->header['width'] * $size, $this->header['height'] * $size );
 
 		imagecolortransparent($img, $s2pal->apply($img, $s2pal->transparent()));
-
-		switch($this->header['type'])
-		{
-		case 0: // greenland
-			{
-				$terrain_colors = array(
-					 0 => 233,  // Savannah
-					 1 => 216,  // Mountain #1
-					 2 => 123,  // Snow
-					 3 => 233,  // Swamp
-					 4 => 199,  // Desert #1
-					 5 =>  61,  // Water
-					 6 =>  61,  // Buildable Water
-					 7 => 199,  // Desert #2
-					 8 => 231,  // Meadow #1
-					 9 => 233,  // Meadow #2
-					10 => 230,  // Meadow #3
-					11 => 216,  // Mountain #2
-					12 => 216,  // Mountain #3
-					13 => 215,  // Mountain #4
-					14 => 236,  // Steppe
-					15 => 231,  // Flower Meadow
-					16 =>  57,  // Lava
-					17 => 254,  // Magenta (Sharp edge!)
-					18 => 216,  // Mountain Meadow
-					19 =>  61,  // Water (Ships don't use this)
-				);
-			} break;
-		case 1: // waste
-			{
-				$terrain_colors = array(
-					 0 => 114,  // Savannah
-					 1 => 167,  // Mountain #1
-					 2 => 139,  // Snow
-					 3 => 160,  // Swamp
-					 4 =>  85,  // Desert #1
-					 5 =>  42,  // Water
-					 6 =>  42,  // Buildable Water
-					 7 =>  85,  // Desert #2
-					 8 => 165,  // Meadow #1
-					 9 => 166,  // Meadow #2
-					10 => 166,  // Meadow #3
-					11 =>  33,  // Mountain #2
-					12 => 212,  // Mountain #3
-					13 => 212,  // Mountain #4
-					14 => 167,  // Steppe
-					15 => 114,  // Flower Meadow
-					16 => 248,  // Lava
-					17 => 254,  // Magenta (Sharp edge!)
-					18 => 160,  // Mountain Meadow
-					19 =>  42,  // Water (Ships don't use this)
-				);
-			} break;
-		case 2: // winter
-			{
-				$terrain_colors = array(
-					 0 => 123,  // Savannah
-					 1 => 116,  // Mountain #1
-					 2 => 244,  // Snow
-					 3 => 244,  // Swamp
-					 4 => 183,  // Desert #1
-					 5 => 240,  // Water
-					 6 => 240,  // Buildable Water
-					 7 => 183,  // Desert #2
-					 8 =>  36,  // Meadow #1
-					 9 => 102,  // Meadow #2
-					10 => 123,  // Meadow #3
-					11 => 117,  // Mountain #2
-					12 => 118,  // Mountain #3
-					13 => 118,  // Mountain #4
-					14 => 233,  // Steppe
-					15 => 120,  // Flower Meadow
-					16 => 248,  // Lava
-					17 => 254,  // Magenta (Sharp edge!)
-					18 => 122,  // Mountain Meadow
-					19 => 240,  // Water (Ships don't use this)
-				);
-			} break;
-		}
-
+		
 		for($x = 0; $x < $this->header['width']; $x++)
 		{
 			for($y = 0; $y < $this->header['height']; $y++)
@@ -232,7 +141,55 @@ class s2map
 					$terrain2 = $this->blocks['terrain2'][$y * $this->header['width'] + $x];
 					if($terrain2 > 0x40) // hafen?
 						$terrain2 -= 0x40;
-					$color = $terrain_colors[$terrain2];
+
+					$cx = -1; $cy = -1;
+					$color = array();
+					switch($terrain2)
+					{
+					// first row
+					case  2: $cx = 16; $cy = 0; break;
+					case  4: 
+					case  7: $cx = 64; $cy = 0; break;
+					case  3: $cx = 112; $cy = 0; break;
+					case 15: $cx = 160; $cy = 0; break;
+
+					// 2nd row
+					case  1: $cx = 16; $cy = 48; break;
+					case 11: $cx = 64; $cy = 48; break;
+					case 12: $cx = 112; $cy = 48; break;
+					case 13: $cx = 160; $cy = 48; break;
+
+					// 3rd row
+					case  0: $cx = 16; $cy = 96; break;
+					case  8: $cx = 64; $cy = 96; break;
+					case  9: $cx = 112; $cy = 96; break;
+					case 10: $cx = 160; $cy = 96; break;
+
+					// 4th row
+					case 14: $color = array(236, 167, 233); break;
+					case 18: $cx = 64; $cy = 144; break;
+					case 16: $color = array(57, 248, 248); break;
+
+					// water
+					case  5: $color = array(61, 42, 240); break;
+					case  6: $color = array(61, 42, 240); break;
+					case 19: $color = array(61, 42, 240); break;
+
+
+					// single pixel texture
+					case 17: $cx = 0; $cy = 254; break;
+					
+					// unknown bottom 3
+					case 20: $color = array(57, 248, 248); break;
+					case 21: $color = array(57, 248, 248); break;
+					case 22: $color = array(57, 248, 248); break;
+					}
+					
+					if($cx != -1 && $cy != -1) {
+						$color = $s2lbm->color($cx, $cy);
+						//trigger_error("($cx, $cy) => $color");
+					} else // hardcoded
+						$color = $color[$this->header['type']];
 				}
 
 				$shadow = 0x40;
@@ -299,9 +256,12 @@ class s2map
 
 	function preview()
 	{
-		//$preview = $this->sql->query_array("SELECT preview,last_changed FROM `s2map` WHERE `hash` = '".$this->sql->escape($this->hash)."'");
-		//if($preview == 0 || $preview['last_changed'] != filemtime($this->file))
+		$preview = $this->sql->query_array("SELECT preview,last_changed FROM `s2map` WHERE `hash` = '".$this->sql->escape($this->hash)."'");
+		if($preview == 0 || $preview['last_changed'] != filemtime($this->file))
+		{
+			trigger_error("generate $this->file");
 			return $this->_generate();
+		}
 
 		return $preview['preview'];
 	}

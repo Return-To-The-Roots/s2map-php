@@ -19,7 +19,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Return To The Roots. If not, see <http://www.gnu.org/licenses/>.
 
-require_once(s2map::_dir("file_helpers.php"));
+require_once(__DIR__."/error.php");
+require_once(__DIR__."/file_helpers.php");
 
 class s2pal
 {
@@ -28,13 +29,19 @@ class s2pal
 
 	function s2pal($file)
 	{
-		$f = pathinfo($file);
-		switch(strtolower($f['extension']))
+		for($i = 0; $i < 256; $i++)
+			$this->colors[$i] = array("r" => 0, "g" => 0, "b" => 0);
+		
+		if(is_file($file))
 		{
-		case 'bbm':	$this->_loadBBM($file); break;
-		case 'pal':
-		case 'act':
-		case 'aco':	$this->_loadACT($file); break;
+			$f = pathinfo($file);
+			switch(strtolower($f['extension']))
+			{
+			case 'bbm':	$this->_loadBBM($file); break;
+			case 'pal':
+			case 'act':
+			case 'aco':	$this->_loadACT($file); break;
+			}
 		}
 	}
 
@@ -45,7 +52,7 @@ class s2pal
 			return false;
 
 		fseek($bbm, 48, SEEK_SET);
-		$this->_load($bbm);
+		$this->colors = $this->read_256rgb($bbm);
 		fclose($bbm);
 
 		return true;
@@ -57,30 +64,64 @@ class s2pal
 		if(!$act)
 			return false;
 
-		$this->_load($act);
+		$this->colors = $this->read_256rgb($act);
 		fclose($act);
 
 		return true;
 	}
 
-	private function _load($f)
+	static function read_256rgb($file)
 	{
+		$colors = array();
 		for($i = 0; $i < 256; $i++)
 		{
-			$r = file_helpers::freadchar($f);
-			$g = file_helpers::freadchar($f);
-			$b = file_helpers::freadchar($f);
-			$this->colors[$i] = array("r" => $r, "g" => $g, "b" => $b);
+			$r = file_helpers::freadchar($file);
+			$g = file_helpers::freadchar($file);
+			$b = file_helpers::freadchar($file);
+			$colors[$i] = array("r" => $r, "g" => $g, "b" => $b);
 		}
+		return $colors;
+	}
+	
+	function set_256rgb($colors)
+	{
+		if(count($colors) != 256)
+			return false;
+		for($i = 0; $i < 256; $i++)
+		{
+			if(!array_key_exists("r", $colors[$i]) || !array_key_exists("g", $colors[$i]) || !array_key_exists("b", $colors[$i]))
+				return false;
+		}
+		
+		$this->colors = $colors;
+		return true;
+	}
+	
+	function set_rgb($nr, $r, $g, $b)
+	{
+		if($r < 0 || $r >= 256 || $g < 0 || $g >= 256 || $b < 0 || $b >= 256 || $nr < 0 || $nr >= 256)
+			return false;
+		
+		$this->colors[$nr] = array("r" => $color['r'], "g" => $color['g'], "b" => $color['b']);
+		return true;
 	}
 
 	function rgb($color)
 	{
+		if(!array_key_exists($color, $this->colors))
+		{
+			trigger_error("color index out of bounds: ".$color);
+			return $this->transparent();
+		}
+
 		return $this->colors[$color];
 	}
 
-	function transparent()
+	function transparent($index = false)
 	{
+		if($index)
+			return $this->transparent;
+			
 		return $this->rgb($this->transparent);
 	}
 
